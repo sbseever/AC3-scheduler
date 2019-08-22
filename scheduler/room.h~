@@ -1,0 +1,30 @@
+using namespace std;
+
+#ifndef _ROOM_H
+#define _ROOM_H
+#include "meeting.h"
+#include "person.h"
+
+class room {
+    public:
+        int number;
+        bool projector;
+	int capacity;
+	int deadline;
+	int score;
+        vector<meeting> schedule[NUM_OF_DAYS];
+	vector<int> free[NUM_OF_DAYS];
+	vector<int> open[NUM_OF_DAYS];
+	room();
+	room(int, int, bool);
+	void findFree();
+	void printFree();
+	void addMeeting(meeting);
+	void findOpen(vector<int>*, meeting);
+	void printOpen();
+	bool isAvailable(meeting);
+	bool isEmpty();
+	void getScore(int);
+};
+
+#endif

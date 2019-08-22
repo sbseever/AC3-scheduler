@@ -1,0 +1,3 @@
+This is the meeting scheduler project for Sean Seever
+To compile it, type "make scheduler" in the command line.
+To run it, type "./scheduler".

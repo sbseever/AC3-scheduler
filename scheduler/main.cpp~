@@ -1,0 +1,218 @@
+#include "ac3.h"
+#include "room.h"
+using namespace std;
+
+//helper function to fetch input and discover rooms
+vector<room> schedule(vector<int>* timeAvailable, vector<room> allRooms, meeting& tempMeeting) {
+  int choice = 0;
+  vector<room> availableRooms;
+  cout << "How many people are estimated to be attending this meeting?\n";
+  cin >> choice;
+  tempMeeting.setAttendees(choice);
+  cout << "Does this meeting require communication with Europe? (0 = no, 1 = yes)\n";
+  cin >> choice;
+  tempMeeting.setEurope((bool)choice);
+  cout << "Does this meeting have a deadline? (0 = no, 1 = yes)\n";
+  cin >> choice;
+  if((bool)choice) {
+    cout << "When is the deadline? (Number between 1 and " << NUM_OF_DAYS << ")\n";
+    cin >> choice;
+    tempMeeting.setDeadline(true, choice);
+    for(int i = 0; i < allRooms.size(); i++) {
+      allRooms[i].deadline = choice;
+    }
+  }
+  cout << "Is this meeting recurring? (0 = no,  1 = yes)\n";
+  cin >> choice;
+  tempMeeting.setRecurring((bool)choice);
+  cout << "Does the meeting need a projector? (0 = no, 1 = yes)\n";
+  cin >> choice;
+  tempMeeting.setProjector((bool)choice);
+  for(int i = 0; i < allRooms.size(); i++) {
+    allRooms[i].findOpen(timeAvailable, tempMeeting);
+    allRooms[i].printOpen();
+    if(allRooms[i].isAvailable(tempMeeting)) { 
+      cout << "Adding " << allRooms[i].number << endl;
+      availableRooms.push_back(allRooms[i]);
+    }
+  }
+  return availableRooms;
+}
+
+//The main function driving the scheduler
+int main() {
+  arcObj ac3;
+  int choice = 0;
+  person p1 = person("Sean", 300);
+  room r1 = room(300, 30, true);
+  person p2 = person("Joe", 321);
+  room r2 = room(321, 40, false);
+  person p3 = person("Jim", 312);
+  room r3 = room(312, 20, true);
+  person p4 = person("Gabor", 343);
+  room r4 = room(343, 50, false);
+  person p5 = person("Connor", 334);
+  room r5 = room(334, 10, true); 
+  meeting tempMeeting;
+  //Initializing everyone's schedules
+  tempMeeting.setStart(9);
+  tempMeeting.setEnd(10);
+  tempMeeting.setDay(1);
+  p1.addMeeting(tempMeeting);
+  p1.addMeeting(tempMeeting);
+  p1.addMeeting(tempMeeting);
+  p2.addMeeting(tempMeeting);
+  p3.addMeeting(tempMeeting);
+  r1.addMeeting(tempMeeting);
+  tempMeeting.setDay(2);
+  tempMeeting.setStart(10);
+  tempMeeting.setEnd(11);
+  p2.addMeeting(tempMeeting);
+  p2.addMeeting(tempMeeting);
+  p2.addMeeting(tempMeeting);
+  p3.addMeeting(tempMeeting);
+  p4.addMeeting(tempMeeting);
+  r2.addMeeting(tempMeeting);
+  tempMeeting.setDay(3);
+  tempMeeting.setStart(11);
+  tempMeeting.setEnd(12);
+  p3.addMeeting(tempMeeting);
+  p3.addMeeting(tempMeeting);
+  p3.addMeeting(tempMeeting);
+  p4.addMeeting(tempMeeting);
+  p5.addMeeting(tempMeeting);
+  r3.addMeeting(tempMeeting);
+  tempMeeting.setDay(4);
+  tempMeeting.setStart(12);
+  tempMeeting.setEnd(1);
+  p4.addMeeting(tempMeeting);
+  p4.addMeeting(tempMeeting);
+  p4.addMeeting(tempMeeting);
+  p5.addMeeting(tempMeeting);
+  p1.addMeeting(tempMeeting);
+  r4.addMeeting(tempMeeting);
+  tempMeeting.setDay(5);
+  tempMeeting.setStart(1);
+  tempMeeting.setEnd(2);
+  p5.addMeeting(tempMeeting);
+  p5.addMeeting(tempMeeting);
+  p5.addMeeting(tempMeeting);
+  p1.addMeeting(tempMeeting);
+  p2.addMeeting(tempMeeting);
+  r5.addMeeting(tempMeeting);
+  p1.printFree();
+  p2.printFree();
+  p3.printFree();
+  p4.printFree();
+  p5.printFree();
+  r1.printFree();
+  r2.printFree();
+  r3.printFree();
+  r4.printFree();
+  r5.printFree();
+  vector<person> people;
+  vector<room> rooms;
+  people.push_back(p1);
+  people.push_back(p2);
+  people.push_back(p3);
+  people.push_back(p4);
+  people.push_back(p5);
+  rooms.push_back(r1);
+  rooms.push_back(r2);
+  rooms.push_back(r3);
+  rooms.push_back(r4);
+  rooms.push_back(r5);
+  vector<person> peopleCopy = people;
+  vector<person> attendees;
+  while(true) {
+    cout << "Who will be leading the meeting?\n";
+    while(true) {
+      for(int i = 1; i <= peopleCopy.size(); i++) {
+	cout << i << ": " << peopleCopy[i-1].getName() << endl;
+      }
+      cout << peopleCopy.size()+1 << ": " << "Finish\n";
+      cin >> choice;
+      if(choice == peopleCopy.size()+1) {break;}
+      else {attendees.push_back(peopleCopy[choice-1]); peopleCopy.erase(peopleCopy.begin()+(choice-1));}
+    }
+    cout << "Would you like to give the leaders time between their other meetings? (0 = no, 1 = yes)\n";
+    cin >> choice;
+    for(int i = 0; i < attendees.size(); i++) {attendees[i].findFree((bool)choice);}
+    ac3.ac3(attendees);
+    if(ac3.ac3(attendees)) { 
+      vector<int> tempSched[NUM_OF_DAYS];
+      vector<room> available;
+      attendees[0].getFree(tempSched);
+      available = schedule(tempSched, rooms, tempMeeting);
+      if(available.empty()) {
+	cout << "No rooms were available for this meeting. Try again? (0 = no, 1 = yes)\n";
+	cin >> choice;
+	if(!(bool)choice) exit(1);
+      }
+      else {
+	cout << "Available Rooms and Times:\n";
+	int recommended = 0;
+	int avgDist = 0;
+	for(int k = 0; k < attendees.size(); k++) avgDist += attendees[k].getOffice();
+	avgDist = avgDist/attendees.size();
+	for(int j = 1; j < available.size(); j++) {
+	  if(available[recommended].getScore(avgDist) < available[j].getScore(avgDist)) recommended = j;
+	}
+	for(int i = 1; i <= available.size(); i++) {
+	  if(i-1 == recommended) cout << "RECOMMENDED ROOM BELOW\n";
+	  cout << i << ": ";
+	  available[i-1].printOpen(); 
+	}
+	cout << endl << "Which room would you like? (Pick a number from above)\n";
+	cin >> choice;
+	room tempRoom = available[choice-1];
+	int i = 0;
+	while(rooms[i].number != tempRoom.number) i++;
+	cout << rooms[i].number << endl;
+	cout << "Which day would you like to select?\n";
+	cin >> choice;
+	tempMeeting.setDay(choice);
+	int originalDay = choice;
+	cout <<"Please pick a starting time.\n";
+	cin >> choice;
+	tempMeeting.setStart(choice);
+	if(tempRoom.open[tempMeeting.getDay()].size() == 1 || tempRoom.open[tempMeeting.getDay()].size()-(choice-9) == 0) {
+	  cout << "The end time has been automatically set to " << choice+1 << endl;
+	  tempMeeting.setEnd(choice+1);
+	}
+	else {
+	  cout << "Pick an end time.\n";
+	  cin >> choice;
+	  tempMeeting.setEnd(choice);
+	}
+	for(int i = 0; i < attendees.size(); i++) {
+	  for(int j = 0; j < people.size(); j++) {
+	    if(people[j] == attendees[i]) {
+	      people[j].addMeeting(tempMeeting);
+	      if(tempMeeting.isRecurring()) {
+		for(int i = originalDay+7; i < tempMeeting.getDeadline(); i += 7) {
+		  tempMeeting.setDay(i);
+		  people[j].addMeeting(tempMeeting);
+		}
+		tempMeeting.setDay(originalDay);
+	      }
+	    }
+	  }
+	}
+	rooms[i].addMeeting(tempMeeting);
+      }
+      attendees.clear(); 
+      peopleCopy = people;
+      for(int i = 0; i < people.size(); i++) {
+        people[i].printFree();
+      }
+
+    }
+    else {
+      cout << "No meeting could be scheduled with the chosen leaders. Try again? (0 = no, 1 = yes)\n";
+      cin >> choice;
+      if(!(bool)choice) exit(1);
+      attendees.clear(); peopleCopy = people;
+    }
+  }
+}

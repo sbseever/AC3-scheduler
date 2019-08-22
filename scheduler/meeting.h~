@@ -1,0 +1,41 @@
+#ifndef _MEETING_H
+#define _MEETING_H
+#include <vector>
+
+const int NUM_OF_DAYS2 = 30;
+
+class meeting {
+    private:
+        bool projector;
+	int room;
+        bool recurring;
+        bool deadline;
+        bool europe;
+        int dayDeadline;
+        int numAttendees;
+        int day;
+        int start;
+        int end;
+    public:
+        meeting();
+        bool hasProjector() {return projector;};
+        bool isRecurring() {return recurring;};
+        bool hasDeadline() {return deadline;};
+        bool needEurope() {return europe;};
+        int getDeadline() {return dayDeadline;};
+        int getNumberPeople() {return numAttendees;};
+        int getStart() {return start;};
+        int getEnd() {return end;};
+	int getDay() {return day;};
+        void setProjector(bool);
+        void setRecurring(bool);
+        void setDeadline(bool, int);
+        void setEurope(bool);
+        void setStart(int);
+        void setEnd(int);
+	void setDay(int);
+	void setAttendees(int);
+        bool operator==(const meeting&);
+};
+
+#endif
